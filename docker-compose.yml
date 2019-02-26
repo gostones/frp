@@ -1,0 +1,59 @@
+#
+version: '3.6'
+
+services:
+  frps:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        - http_proxy=${http_proxy}
+        - https_proxy=${https_proxy}
+    image: asperitus/frp:latest
+    restart: always
+    volumes:
+      - etc:/app/etc
+    ports:
+      - "80:80"
+      - "443:443"
+      - "7000:7000"
+      - "7500:7500" 
+    entrypoint:
+      - '/app/bin/frps'
+      - '-c'
+      - '/app/etc/frps.ini'
+
+  frpc:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        - http_proxy=${http_proxy}
+        - https_proxy=${https_proxy}
+    image: asperitus/frp:latest
+    restart: always
+    ports:
+      - "7400:7400"
+    volumes:
+      # - /var/run/docker.sock:/var/run/docker.sock
+      - etc:/app/etc
+    entrypoint:
+      - '/app/bin/frpc'
+      - '-c'
+      - '/app/etc/frpc.ini'
+
+volumes:
+  etc:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $PWD/etc
+
+# networks:
+#   default:
+#     external: true
+#     name: web
+#
+# docker network create web
+#
